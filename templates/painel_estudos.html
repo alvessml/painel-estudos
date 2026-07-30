@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel de Estudos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="painel_estudos_files/css2_ZU72.css" rel="stylesheet">
+<style>
+  :root{
+    --bg: #16283D;
+    --bg-grid: rgba(255,255,255,0.05);
+    --card: #1F3A5F;
+    --card-hi: #274766;
+    --line: rgba(255,255,255,0.10);
+    --ink: #EDEFF2;
+    --ink-dim: #9FB3C8;
+    --accent: #F2C14E;
+    --accent-ink: #2A2106;
+    --good: #6FCF97;
+    --bad: #EB5757;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) 0 0/28px 28px,
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:28px 16px 80px;
+  }
+  .wrap{max-width:880px;margin:0 auto;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);margin:0 0 6px;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(26px,5vw,34px);
+    margin:0 0 4px;font-weight:700;
+  }
+  .sub{color:var(--ink-dim);font-size:14px;margin:0 0 24px;}
+
+  /* Ticket / countdown */
+  .ticket{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    display:flex;justify-content:space-between;align-items:center;
+    gap:16px;flex-wrap:wrap;
+    margin-bottom:28px;
+    overflow:hidden;
+  }
+  .ticket::before{
+    content:"";position:absolute;left:-10px;top:50%;transform:translateY(-50%);
+    width:20px;height:20px;background:var(--bg);border-radius:50%;
+  }
+  .ticket::after{
+    content:"";position:absolute;right:-10px;top:50%;transform:translateY(-50%);
+    width:20px;height:20px;background:var(--bg);border-radius:50%;
+  }
+  .ticket-label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-dim);letter-spacing:.08em;text-transform:uppercase;}
+  .ticket-title{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;margin-top:4px;}
+  .ticket-sub{font-size:13px;color:var(--ink-dim);margin-top:2px;}
+  .countdown{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:clamp(30px,6vw,42px);
+    font-weight:600;color:var(--accent);
+    line-height:1;
+    display:flex;align-items:baseline;gap:8px;
+  }
+  .countdown span.unit{font-size:13px;color:var(--ink-dim);font-weight:400;}
+
+  /* Progress by subject */
+  .subjects{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px;margin-bottom:30px;
+  }
+  .subj-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 16px;
+  }
+  .subj-name{font-size:12px;color:var(--ink-dim);font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;}
+  .subj-pct{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin:4px 0 8px;}
+  .bar-track{height:6px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;}
+  .bar-fill{height:100%;border-radius:4px;transition:width .3s ease;}
+
+  /* Rotina diária */
+  .section-title{
+    font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;
+    margin:2px 0 14px;
+  }
+  .routine-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:14px;margin-bottom:12px;
+  }
+  .day-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;border-top:3px solid var(--dot,var(--accent));
+  }
+  .day-card .day-name{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;margin-bottom:2px;
+  }
+  .day-card .day-note{
+    font-size:12px;color:var(--ink-dim);margin-bottom:12px;
+  }
+  .slot{
+    display:flex;gap:10px;padding:6px 0;
+    border-top:1px dashed var(--line);
+  }
+  .slot:first-of-type{border-top:none;}
+  .slot-time{
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--accent);
+    white-space:nowrap;flex-shrink:0;width:98px;
+  }
+  .slot-what{font-size:13.5px;line-height:1.4;}
+  .slot.study .slot-what{font-weight:600;}
+
+  /* Weeks */
+  .week{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--card);
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  .week-head{
+    display:flex;align-items:center;gap:14px;
+    padding:16px 18px;cursor:pointer;
+    user-select:none;
+  }
+  .week-num{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;
+    color:var(--accent-ink);background:var(--accent);
+    width:34px;height:34px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .week-title{flex:1;min-width:0;}
+  .week-title .name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;}
+  .week-title .dates{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-dim);margin-top:2px;}
+  .week-progress{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-dim);white-space:nowrap;}
+  .chevron{transition:transform .2s ease;color:var(--ink-dim);flex-shrink:0;}
+  .week.open .chevron{transform:rotate(180deg);}
+  .week-body{
+    max-height:0;overflow:hidden;transition:max-height .25s ease;
+    border-top:1px solid var(--line);
+  }
+  .week.open .week-body{max-height:900px;}
+  .task-list{padding:6px 10px 12px;}
+  .task{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:9px 8px;border-radius:9px;
+  }
+  .task:hover{background:var(--card-hi);}
+  .task input{
+    margin-top:3px;width:17px;height:17px;flex-shrink:0;accent-color:var(--good);cursor:pointer;
+  }
+  .task label{font-size:14.5px;line-height:1.4;cursor:pointer;}
+  .task.done label{color:var(--ink-dim);text-decoration:line-through;}
+  .tag{
+    display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+    padding:1px 6px;border-radius:5px;margin-right:7px;font-weight:600;
+    vertical-align:1px;
+  }
+
+  .footer-actions{
+    display:flex;justify-content:center;margin-top:20px;
+  }
+  .reset-btn{
+    background:transparent;border:1px solid var(--line);color:var(--ink-dim);
+    font-family:'IBM Plex Mono',monospace;font-size:12px;
+    padding:8px 14px;border-radius:8px;cursor:pointer;
+  }
+  .reset-btn:hover{border-color:var(--bad);color:var(--bad);}
+
+  /* Tabs */
+  .tabs{
+    display:flex;gap:6px;margin-top:8px;margin-bottom:18px;
+    border-bottom:1px solid var(--line);
+  }
+  .tab-btn{
+    background:transparent;border:none;color:var(--ink-dim);
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;
+    padding:10px 4px;margin-right:22px;cursor:pointer;
+    border-bottom:2px solid transparent;
+    position:relative;top:1px;
+  }
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--accent);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* Provas & Trabalhos */
+  .prova-subject{
+    border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--card);margin-bottom:16px;overflow:hidden;
+  }
+  .prova-subject-head{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 18px;border-bottom:1px solid var(--line);
+  }
+  .prova-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .prova-subject-head .name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;}
+  .prova-subject-head .count{
+    margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-dim);
+  }
+  .prova-item{
+    display:flex;align-items:flex-start;gap:12px;
+    padding:12px 18px;border-top:1px dashed var(--line);
+  }
+  .prova-item:first-of-type{border-top:none;}
+  .prova-item input{
+    margin-top:3px;width:19px;height:19px;flex-shrink:0;accent-color:var(--good);cursor:pointer;
+  }
+  .prova-item .p-main{flex:1;min-width:0;}
+  .prova-item label{font-size:14.5px;font-weight:600;cursor:pointer;}
+  .prova-item.done label{color:var(--ink-dim);text-decoration:line-through;}
+  .prova-item .p-meta{
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-dim);margin-top:3px;
+  }
+  .weight-pill{
+    display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+    padding:1px 6px;border-radius:5px;margin-right:6px;font-weight:600;
+    background:rgba(255,255,255,0.08);color:var(--ink-dim);
+  }
+
+  /* Agenda */
+  .agenda-nav{
+    display:flex;align-items:center;justify-content:center;gap:18px;
+    margin-bottom:18px;
+  }
+  .agenda-nav button{
+    background:var(--card);border:1px solid var(--line);color:var(--ink);
+    width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:16px;
+  }
+  .agenda-nav button:hover{border-color:var(--accent);color:var(--accent);}
+  .agenda-month-label{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;
+    text-transform:capitalize;min-width:180px;text-align:center;
+  }
+  .cal-grid{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:18px;
+  }
+  .cal-weekday{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-dim);
+    text-align:center;padding-bottom:4px;letter-spacing:.04em;
+  }
+  .cal-day{
+    background:var(--card);border:1px solid var(--line);border-radius:9px;
+    min-height:64px;padding:6px;position:relative;
+  }
+  .cal-day.empty{background:transparent;border-color:transparent;}
+  .cal-day.today{border-color:var(--accent);}
+  .cal-day .num{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-dim);}
+  .cal-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;}
+  .cal-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .cal-day .ev-label{
+    font-size:9.5px;line-height:1.25;margin-top:3px;color:var(--ink-dim);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .agenda-legend{
+    display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:6px;
+  }
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);}
+  .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  @media (max-width:600px){
+    .cal-grid{gap:4px;}
+    .cal-day{min-height:48px;padding:4px;}
+    .cal-day .ev-label{display:none;}
+  }
+
+  @media (max-width:480px){
+    .ticket{flex-direction:column;align-items:flex-start;}
+  }
+
+  .btn-excluir-tarefa {
+    margin-left: auto;
+    background: transparent;
+    color: var(--bad);
+    border: 1px solid var(--bad);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .btn-excluir-tarefa:hover {
+      background: var(--bad);
+      color: white;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Planta de estudo — 2 meses</p>
+  <h1>Painel de Organização</h1>
+  <p class="sub">Marque o que já foi feito. Fica salvo automaticamente no seu navegador.</p>
+
+  <div class="ticket">
+    <div>
+      <div class="ticket-label">Próximo prazo</div>
+      <div class="ticket-title" id="next-title">Agendar/fazer o Exame (recomendado até dia 19)</div>
+      <div class="ticket-sub" id="next-sub">Análise de Sistemas · até 19/08</div>
+    </div>
+    <div class="countdown" id="countdown">24<span class="unit">dias</span></div>
+  </div>
+
+  <div class="subjects" id="subjects"><div class="subj-card">
+      <div class="subj-name">Análise de Sistemas</div>
+      <div class="subj-pct" style="color:#EB5757">40%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:40%;background:#EB5757"></div></div>
+    </div><div class="subj-card">
+      <div class="subj-name">Estrutura de Dados I</div>
+      <div class="subj-pct" style="color:#F2C14E">0%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%;background:#F2C14E"></div></div>
+    </div><div class="subj-card">
+      <div class="subj-name">Arquitetura de Computadores</div>
+      <div class="subj-pct" style="color:#56CCF2">0%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%;background:#56CCF2"></div></div>
+    </div><div class="subj-card">
+      <div class="subj-name">Programação Orientada a Objetos</div>
+      <div class="subj-pct" style="color:#9B7BEA">0%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%;background:#9B7BEA"></div></div>
+    </div><div class="subj-card">
+      <div class="subj-name">Organização geral</div>
+      <div class="subj-pct" style="color:#6FCF97">0%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%;background:#6FCF97"></div></div>
+    </div></div>
+
+  <p class="eyebrow" style="margin-top:6px;">Rotina fixa</p>
+  <h2 class="section-title">Horários de estudo por dia</h2>
+  <div class="routine-grid" id="routine"><div class="day-card" style="--dot: #F2C14E;">
+      <div class="day-name">Segunda e Terça</div>
+      <div class="day-note">Home office — manhã livre para estudo, trabalho das 12h12 às 22h</div>
+      
+      <div class="slot">
+        <div class="slot-time">06h00–06h30</div>
+        <div class="slot-what">Acordar / café</div>
+      </div>
+    
+      <div class="slot study">
+        <div class="slot-time">06h30–10h00</div>
+        <div class="slot-what">Bloco de estudo principal (3h30)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">10h00–12h12</div>
+        <div class="slot-what">Organizar o dia / almoço antes do trabalho</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">12h12–17h00</div>
+        <div class="slot-what">Trabalho (home office — dá pra encaixar revisões rápidas entre tarefas)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">17h00–18h00</div>
+        <div class="slot-what">Intervalo (1h) — descanso, ou 20-30min de revisão leve se sobrar energia</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">18h00–22h00</div>
+        <div class="slot-what">Trabalho</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">22h00–23h00</div>
+        <div class="slot-what">Descanso / jantar</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">23h00–23h30</div>
+        <div class="slot-what">Dormir</div>
+      </div>
+    
+    </div><div class="day-card" style="--dot: #56CCF2;">
+      <div class="day-name">Quarta, Quinta e Sexta</div>
+      <div class="day-note">Presencial — trabalho também das 12h12 às 22h</div>
+      
+      <div class="slot">
+        <div class="slot-time">06h00–06h30</div>
+        <div class="slot-what">Acordar / café</div>
+      </div>
+    
+      <div class="slot study">
+        <div class="slot-time">06h30–10h00</div>
+        <div class="slot-what">Bloco de estudo (3h30)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">10h00–10h20</div>
+        <div class="slot-what">Buffer / organizar as coisas</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">10h20</div>
+        <div class="slot-what">Se arrumar</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">10h40</div>
+        <div class="slot-what">Sair para o ônibus</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">11h30</div>
+        <div class="slot-what">Chega no trabalho (aguarda início)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">12h12–17h00</div>
+        <div class="slot-what">Trabalho</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">17h00–18h00</div>
+        <div class="slot-what">Intervalo (1h)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">18h00–22h00</div>
+        <div class="slot-what">Trabalho</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">22h00–22h40</div>
+        <div class="slot-what">Uber para casa (30-40min)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">22h40–23h30</div>
+        <div class="slot-what">Jantar / dormir</div>
+      </div>
+    
+    </div><div class="day-card" style="--dot: #6FCF97;">
+      <div class="day-name">Sábado</div>
+      <div class="day-note">Dia livre — bloco grande de estudo</div>
+      
+      <div class="slot">
+        <div class="slot-time">08h30–09h00</div>
+        <div class="slot-what">Acordar / café</div>
+      </div>
+    
+      <div class="slot study">
+        <div class="slot-time">09h00–12h00</div>
+        <div class="slot-what">Bloco de estudo 1 (3h)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">12h00–14h00</div>
+        <div class="slot-what">Almoço / descanso</div>
+      </div>
+    
+      <div class="slot study">
+        <div class="slot-time">14h00–16h30</div>
+        <div class="slot-what">Bloco de estudo 2 (2h30)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">Noite</div>
+        <div class="slot-what">Livre — sair com sua esposa</div>
+      </div>
+    
+    </div><div class="day-card" style="--dot: #9B7BEA;">
+      <div class="day-name">Domingo</div>
+      <div class="day-note">Dia livre até 17h</div>
+      
+      <div class="slot study">
+        <div class="slot-time">09h00–12h00</div>
+        <div class="slot-what">Bloco de estudo 3 (3h)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">12h00–13h00</div>
+        <div class="slot-what">Almoço</div>
+      </div>
+    
+      <div class="slot study">
+        <div class="slot-time">13h00–16h30</div>
+        <div class="slot-what">Bloco de estudo 4 (3h30)</div>
+      </div>
+    
+      <div class="slot">
+        <div class="slot-time">17h00–19h00</div>
+        <div class="slot-what">Culto</div>
+      </div>
+    
+    </div></div>
+
+  <p class="eyebrow" style="margin-top:30px;">Organização</p>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="aulas">📘 Aulas</button>
+    <button class="tab-btn" data-tab="provas">📝 Provas &amp; Trabalhos</button>
+    <button class="tab-btn" data-tab="agenda">📅 Agenda</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-aulas">
+    <div id="weeks-dinamicas"></div>
+    <div id="weeks" style="display: none;"><div class="week" data-week="1"><div class="week-head">
+      <div class="week-num">01</div>
+      <div class="week-title">
+        <div class="name">Análise do zero</div>
+        <div class="dates">27/07 – 02/08</div>
+      </div>
+      <div class="week-progress">2/8</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div><div class="week-body"><div class="task-list"><div class="task done">
+        <input type="checkbox" id="w1-1" checked="checked">
+        <label for="w1-1"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Aula 1 — Processos de Negócio e Notação BPMN</label>
+      </div><div class="task done">
+        <input type="checkbox" id="w1-2" checked="checked">
+        <label for="w1-2"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Aula 2 — Histórico e Diagrama de Fluxo de Dados</label>
+      </div><div class="task">
+        <input type="checkbox" id="w1-3">
+        <label for="w1-3"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Aula 3 — Engenharia de Requisitos e Casos de Uso</label>
+      </div><div class="task">
+        <input type="checkbox" id="w1-4">
+        <label for="w1-4"><span class="tag" style="background:#56CCF222;color:#56CCF2">Arquitetura</span>Aula 1 — Fundamentação</label>
+      </div><div class="task">
+        <input type="checkbox" id="w1-5">
+        <label for="w1-5"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Aula 4 — UML e Diagrama de Caso de Uso</label>
+      </div><div class="task">
+        <input type="checkbox" id="w1-6">
+        <label for="w1-6"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Revisão da semana + exercícios de fixação</label>
+      </div><div class="task">
+        <input type="checkbox" id="w1-7">
+        <label for="w1-7"><span class="tag" style="background:#6FCF9722;color:#6FCF97">Organização</span>Manhãs qua/qui/sex: revisar Aulas 1–4 de Análise</label>
+      </div><div class="task">
+        <input type="checkbox" id="w1-8">
+        <label for="w1-8"><span class="tag" style="background:#9B7BEA22;color:#9B7BEA">Programação</span>30min — Aula 1 (Linguagem Java)</label>
+      </div></div></div></div><div class="week" data-week="2"><div class="week-head">
+      <div class="week-num">02</div>
+      <div class="week-title">
+        <div class="name">Fechar conteúdo de Análise + começar Estrutura e Arquitetura</div>
+        <div class="dates">03/08 – 09/08</div>
+      </div>
+      <div class="week-progress">0/8</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div><div class="week-body"><div class="task-list"><div class="task">
+        <input type="checkbox" id="w2-1">
+        <label for="w2-1"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Aula 5 — Diagrama de Classes</label>
+      </div><div class="task">
+        <input type="checkbox" id="w2-3b">
+        <label for="w2-3b"><span class="tag" style="background:#56CCF222;color:#56CCF2">Arquitetura</span>Aula 2 — Visão Geral dos Computadores</label>
+      </div><div class="task">
+        <input type="checkbox" id="w2-3c">
+        <label for="w2-3c"><span class="tag" style="background:#56CCF222;color:#56CCF2">Arquitetura</span>Aula 3 — Lógica Digital</label>
+      </div><div class="task">
+        <input type="checkbox" id="w2-5">
+        <label for="w2-5"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Aula 6 — Outros Diagramas Importantes</label>
+      </div><div class="task">
+        <input type="checkbox" id="w2-6">
+        <label for="w2-6"><span class="tag" style="background:#F2C14E22;color:#F2C14E">Estrutura</span>Aula 1 e 2 — Algoritmos Estruturados / Estruturas de Repetição</label>
+      </div><div class="task">
+        <input type="checkbox" id="w2-7">
+        <label for="w2-7"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Revisão geral com questões/simulados</label>
+      </div><div class="task">
+        <input type="checkbox" id="w2-9">
+        <label for="w2-9"><span class="tag" style="background:#6FCF9722;color:#6FCF97">Organização</span>Manhãs qua/qui/sex: revisão Análise 5–6 + fixação Estrutura 1–2</label>
+      </div><div class="task">
+        <input type="checkbox" id="w2-10">
+        <label for="w2-10"><span class="tag" style="background:#9B7BEA22;color:#9B7BEA">Programação</span>30min — Aula 2 (Classes e Objetos)</label>
+      </div></div></div></div><div class="week" data-week="3"><div class="week-head">
+      <div class="week-num">03</div>
+      <div class="week-title">
+        <div class="name">Reta final de Análise</div>
+        <div class="dates">10/08 – 16/08</div>
+      </div>
+      <div class="week-progress">0/6</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div><div class="week-body"><div class="task-list"><div class="task">
+        <input type="checkbox" id="w3-1">
+        <label for="w3-1"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Revisão intensiva (simulados, resumos, questões antigas)</label>
+      </div><div class="task">
+        <input type="checkbox" id="w3-2">
+        <label for="w3-2"><span class="tag" style="background:#F2C14E22;color:#F2C14E">Estrutura</span>Aula 3 e 4 — Estruturas Homogêneas/Heterogêneas</label>
+      </div><div class="task">
+        <input type="checkbox" id="w3-4">
+        <label for="w3-4"><span class="tag" style="background:#EB575722;color:#EB5757">Análise</span>Revisão final (fixar, não conteúdo novo)</label>
+      </div><div class="task">
+        <input type="checkbox" id="w3-5b">
+        <label for="w3-5b"><span class="tag" style="background:#56CCF222;color:#56CCF2">Arquitetura</span>Aula 4 — Microprocessadores e a Microprogramação</label>
+      </div><div class="task">
+        <input type="checkbox" id="w3-6">
+        <label for="w3-6"><span class="tag" style="background:#6FCF9722;color:#6FCF97">Organização</span>Manhãs qua/qui/sex: simulados intensivos de Análise</label>
+      </div><div class="task">
+        <input type="checkbox" id="w3-7">
+        <label for="w3-7"><span class="tag" style="background:#9B7BEA22;color:#9B7BEA">Programação</span>30min — Aula 3 (Visibilidade)</label>
+      </div></div></div></div><div class="week" data-week="4"><div class="week-head">
+      <div class="week-num">04</div>
+      <div class="week-title">
+        <div class="name">Semana do Exame</div>
+        <div class="dates">17/08 – 23/08</div>
+      </div>
+      <div class="week-progress">0/3</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div><div class="week-body"><div class="task-list"><div class="task">
+        <input type="checkbox" id="w4-4b">
+        <label for="w4-4b"><span class="tag" style="background:#56CCF222;color:#56CCF2">Arquitetura</span>Aula 5 — Sistemas Operacionais</label>
+      </div><div class="task">
+        <input type="checkbox" id="w4-4c">
+        <label for="w4-4c"><span class="tag" style="background:#56CCF222;color:#56CCF2">Arquitetura</span>Aula 6 — Arquiteturas Paralelas</label>
+      </div><div class="task">
+        <input type="checkbox" id="w4-6">
+        <label for="w4-6"><span class="tag" style="background:#9B7BEA22;color:#9B7BEA">Programação</span>30min — Aula 4 (Herança)</label>
+      </div></div></div></div><div class="week" data-week="5"><div class="week-head">
+      <div class="week-num">05</div>
+      <div class="week-title">
+        <div class="name">Revisão geral — Estrutura de Dados</div>
+        <div class="dates">24/08 – 30/08</div>
+      </div>
+      <div class="week-progress">0/3</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div><div class="week-body"><div class="task-list"><div class="task">
+        <input type="checkbox" id="w5-2">
+        <label for="w5-2"><span class="tag" style="background:#F2C14E22;color:#F2C14E">Estrutura</span>Revisão geral (Aulas 1–7) para a Prova Objetiva</label>
+      </div><div class="task">
+        <input type="checkbox" id="w5-3">
+        <label for="w5-3"><span class="tag" style="background:#6FCF9722;color:#6FCF97">Organização</span>Manhãs qua/qui/sex: revisão de Estrutura de Dados</label>
+      </div><div class="task">
+        <input type="checkbox" id="w5-4">
+        <label for="w5-4"><span class="tag" style="background:#9B7BEA22;color:#9B7BEA">Programação</span>30min — Aula 5 (Polimorfismo)</label>
+      </div></div></div></div><div class="week" data-week="6"><div class="week-head">
+      <div class="week-num">06</div>
+      <div class="week-title">
+        <div class="name">Revisão intensiva das objetivas</div>
+        <div class="dates">31/08 – 06/09</div>
+      </div>
+      <div class="week-progress">0/4</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div><div class="week-body"><div class="task-list"><div class="task">
+        <input type="checkbox" id="w6-1">
+        <label for="w6-1"><span class="tag" style="background:#F2C14E22;color:#F2C14E">Estrutura</span>Revisão intensiva mirando a Prova Objetiva</label>
+      </div><div class="task">
+        <input type="checkbox" id="w6-2">
+        <label for="w6-2"><span class="tag" style="background:#56CCF222;color:#56CCF2">Arquitetura</span>Revisão intensiva mirando a Prova Objetiva</label>
+      </div><div class="task">
+        <input type="checkbox" id="w6-3">
+        <label for="w6-3"><span class="tag" style="background:#6FCF9722;color:#6FCF97">Organização</span>Manhãs qua/qui/sex: alternar revisão ED/AC</label>
+      </div><div class="task">
+        <input type="checkbox" id="w6-4">
+        <label for="w6-4"><span class="tag" style="background:#9B7BEA22;color:#9B7BEA">Programação</span>30min — Aula 6 (Tratamento de Exceções)</label>
+      </div></div></div></div><div class="week" data-week="7"><div class="week-head">
+      <div class="week-num">07</div>
+      <div class="week-title">
+        <div class="name">Simulados finais</div>
+        <div class="dates">07/09 – 13/09</div>
+      </div>
+      <div class="week-progress">0/4</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div><div class="week-body"><div class="task-list"><div class="task">
+        <input type="checkbox" id="w7-1">
+        <label for="w7-1"><span class="tag" style="background:#F2C14E22;color:#F2C14E">Estrutura</span>Simulados finais de Estrutura de Dados</label>
+      </div><div class="task">
+        <input type="checkbox" id="w7-2">
+        <label for="w7-2"><span class="tag" style="background:#56CCF222;color:#56CCF2">Arquitetura</span>Simulados finais de Arquitetura</label>
+      </div><div class="task">
+        <input type="checkbox" id="w7-3">
+        <label for="w7-3"><span class="tag" style="background:#6FCF9722;color:#6FCF97">Organização</span>Manhãs qua/qui/sex: simulados finais das duas matérias</label>
+      </div><div class="task">
+        <input type="checkbox" id="w7-4">
+        <label for="w7-4"><span class="tag" style="background:#9B7BEA22;color:#9B7BEA">Programação</span>Revisão geral leve (Aula 7)</label>
+      </div></div></div></div><div class="week" data-week="8"><div class="week-head">
+      <div class="week-num">08</div>
+      <div class="week-title">
+        <div class="name">Sem conteúdo novo</div>
+        <div class="dates">14/09</div>
+      </div>
+      <div class="week-progress">0/1</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div><div class="week-body"><div class="task-list"><div class="task">
+        <input type="checkbox" id="w8-1">
+        <label for="w8-1"><span class="tag" style="background:#6FCF9722;color:#6FCF97">Organização</span>Semana de folga de conteúdo — reforce o que achar necessário</label>
+      </div></div></div></div></div>
+  </div>
+
+  <div class="tab-panel" id="tab-provas">
+    <div id="provas"><div class="prova-subject"><div class="prova-subject-head">
+      <span class="prova-dot" style="background:#EB5757"></span>
+      <span class="name">Análise de Sistemas</span>
+      <span class="count">4/5</span>
+    </div><div class="prova-item done">
+        <input type="checkbox" id="p-as-1" checked="checked">
+        <div class="p-main">
+          <label for="p-as-1">APOL 1 (peso 15%)</label>
+          <div class="p-meta">Entregue — nota 100</div>
+        </div>
+      </div><div class="prova-item done">
+        <input type="checkbox" id="p-as-2" checked="checked">
+        <div class="p-main">
+          <label for="p-as-2">APOL 2 (peso 15%)</label>
+          <div class="p-meta">Entregue — nota 100</div>
+        </div>
+      </div><div class="prova-item done">
+        <input type="checkbox" id="p-as-3" checked="checked">
+        <div class="p-main">
+          <label for="p-as-3">Prova Objetiva Regular (peso 30%)</label>
+          <div class="p-meta">Entregue — nota 80</div>
+        </div>
+      </div><div class="prova-item done">
+        <input type="checkbox" id="p-as-4" checked="checked">
+        <div class="p-main">
+          <label for="p-as-4">Trabalho (peso 40%)</label>
+          <div class="p-meta">Entregue — nota 20</div>
+        </div>
+      </div><div class="prova-item">
+        <input type="checkbox" id="p-as-5">
+        <div class="p-main">
+          <label for="p-as-5">Exame / Recuperação — DECISIVO (peso 100%)</label>
+          <div class="p-meta">Presencial · agendar e fazer entre 17/08 e 31/08 (recomendado até dia 19)</div>
+        </div>
+      </div></div><div class="prova-subject"><div class="prova-subject-head">
+      <span class="prova-dot" style="background:#F2C14E"></span>
+      <span class="name">Estrutura de Dados I</span>
+      <span class="count">0/4</span>
+    </div><div class="prova-item">
+        <input type="checkbox" id="p-ed-1">
+        <div class="p-main">
+          <label for="p-ed-1">APOL 1 (peso 15%)</label>
+          <div class="p-meta">Até 24/08 (23:59h)</div>
+        </div>
+      </div><div class="prova-item">
+        <input type="checkbox" id="p-ed-2">
+        <div class="p-main">
+          <label for="p-ed-2">APOL 2 (peso 15%)</label>
+          <div class="p-meta">Até 24/08 (23:59h)</div>
+        </div>
+      </div><div class="prova-item">
+        <input type="checkbox" id="p-ed-3">
+        <div class="p-main">
+          <label for="p-ed-3">Trabalho Prático 1 (peso 40%)</label>
+          <div class="p-meta">Entrega em PDF · até 24/08 (23:59h)</div>
+        </div>
+      </div><div class="prova-item">
+        <input type="checkbox" id="p-ed-4">
+        <div class="p-main">
+          <label for="p-ed-4">Prova Objetiva Regular (peso 30%)</label>
+          <div class="p-meta">Até 14/09 (22h)</div>
+        </div>
+      </div></div><div class="prova-subject"><div class="prova-subject-head">
+      <span class="prova-dot" style="background:#56CCF2"></span>
+      <span class="name">Arquitetura de Computadores</span>
+      <span class="count">0/4</span>
+    </div><div class="prova-item">
+        <input type="checkbox" id="p-ac-1">
+        <div class="p-main">
+          <label for="p-ac-1">APOL 1 (peso 15%)</label>
+          <div class="p-meta">Até 24/08 (23:59h)</div>
+        </div>
+      </div><div class="prova-item">
+        <input type="checkbox" id="p-ac-2">
+        <div class="p-main">
+          <label for="p-ac-2">APOL 2 (peso 15%)</label>
+          <div class="p-meta">Até 24/08 (23:59h)</div>
+        </div>
+      </div><div class="prova-item">
+        <input type="checkbox" id="p-ac-3">
+        <div class="p-main">
+          <label for="p-ac-3">Prova Atividade Prática (peso 40%)</label>
+          <div class="p-meta">1 tentativa · até 31/08 (23:59h)</div>
+        </div>
+      </div><div class="prova-item">
+        <input type="checkbox" id="p-ac-4">
+        <div class="p-main">
+          <label for="p-ac-4">Prova Objetiva Regular (peso 30%)</label>
+          <div class="p-meta">Até 14/09 (22h)</div>
+        </div>
+      </div></div><div class="prova-subject"><div class="prova-subject-head">
+      <span class="prova-dot" style="background:#9B7BEA"></span>
+      <span class="name">Programação Orientada a Objetos</span>
+      <span class="count">0/1</span>
+    </div><div class="prova-item">
+        <input type="checkbox" id="p-poo-1">
+        <div class="p-main">
+          <label for="p-poo-1">Prova de Recuperação (peso 100%)</label>
+          <div class="p-meta">1 tentativa · até 20/12 (22h)</div>
+        </div>
+      </div></div></div>
+  </div>
+
+  <div class="tab-panel" id="tab-agenda">
+    <div class="agenda-nav">
+      <button id="agenda-prev">‹</button>
+      <div class="agenda-month-label" id="agenda-month-label">Julho 2026</div>
+      <button id="agenda-next">›</button>
+    </div>
+    <div class="cal-grid" id="calendar"><div class="cal-weekday">Dom</div><div class="cal-weekday">Seg</div><div class="cal-weekday">Ter</div><div class="cal-weekday">Qua</div><div class="cal-weekday">Qui</div><div class="cal-weekday">Sex</div><div class="cal-weekday">Sáb</div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day">
+      <div class="num">1</div>
+      
+    </div><div class="cal-day">
+      <div class="num">2</div>
+      
+    </div><div class="cal-day">
+      <div class="num">3</div>
+      
+    </div><div class="cal-day">
+      <div class="num">4</div>
+      
+    </div><div class="cal-day">
+      <div class="num">5</div>
+      
+    </div><div class="cal-day">
+      <div class="num">6</div>
+      
+    </div><div class="cal-day">
+      <div class="num">7</div>
+      
+    </div><div class="cal-day">
+      <div class="num">8</div>
+      
+    </div><div class="cal-day">
+      <div class="num">9</div>
+      
+    </div><div class="cal-day">
+      <div class="num">10</div>
+      
+    </div><div class="cal-day">
+      <div class="num">11</div>
+      
+    </div><div class="cal-day">
+      <div class="num">12</div>
+      
+    </div><div class="cal-day">
+      <div class="num">13</div>
+      
+    </div><div class="cal-day">
+      <div class="num">14</div>
+      
+    </div><div class="cal-day">
+      <div class="num">15</div>
+      
+    </div><div class="cal-day">
+      <div class="num">16</div>
+      
+    </div><div class="cal-day">
+      <div class="num">17</div>
+      
+    </div><div class="cal-day">
+      <div class="num">18</div>
+      
+    </div><div class="cal-day">
+      <div class="num">19</div>
+      
+    </div><div class="cal-day">
+      <div class="num">20</div>
+      
+    </div><div class="cal-day">
+      <div class="num">21</div>
+      
+    </div><div class="cal-day">
+      <div class="num">22</div>
+      
+    </div><div class="cal-day">
+      <div class="num">23</div>
+      
+    </div><div class="cal-day">
+      <div class="num">24</div>
+      
+    </div><div class="cal-day">
+      <div class="num">25</div>
+      
+    </div><div class="cal-day">
+      <div class="num">26</div>
+      
+    </div><div class="cal-day today">
+      <div class="num">27</div>
+      
+    </div><div class="cal-day">
+      <div class="num">28</div>
+      
+    </div><div class="cal-day">
+      <div class="num">29</div>
+      
+    </div><div class="cal-day">
+      <div class="num">30</div>
+      
+    </div><div class="cal-day">
+      <div class="num">31</div>
+      
+    </div></div>
+    <div class="agenda-legend" id="agenda-legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#EB5757"></span>Análise de Sistemas</div>
+  
+    <div class="legend-item"><span class="legend-dot" style="background:#F2C14E"></span>Estrutura de Dados I</div>
+  
+    <div class="legend-item"><span class="legend-dot" style="background:#56CCF2"></span>Arquitetura de Computadores</div>
+  
+    <div class="legend-item"><span class="legend-dot" style="background:#9B7BEA"></span>Programação Orientada a Objetos</div>
+  </div>
+  </div>
+
+  <div class="footer-actions">
+    <button class="reset-btn" id="reset-btn">Reiniciar progresso</button>
+  </div>
+</div>
+
+<script>
+const SUBJECTS = {
+  AS:  { name:"Análise de Sistemas", color:"#EB5757" },
+  ED:  { name:"Estrutura de Dados I", color:"#F2C14E" },
+  AC:  { name:"Arquitetura de Computadores", color:"#56CCF2" },
+  POO: { name:"Programação Orientada a Objetos", color:"#9B7BEA" },
+  GER: { name:"Organização geral", color:"#6FCF97" }
+};
+
+const DEADLINES = [
+  { date:"2026-08-19T22:00:00", label:"Agendar/fazer o Exame (recomendado até dia 19)", subj:"AS" },
+  { date:"2026-08-24T23:59:00", label:"APOL 1 e 2 + Trabalho Prático (40%)", subj:"ED" },
+  { date:"2026-08-24T23:59:00", label:"APOL 1 e 2", subj:"AC" },
+  { date:"2026-08-31T23:59:00", label:"Prova Atividade Prática (40%, tentativa única)", subj:"AC" },
+  { date:"2026-08-31T22:00:00", label:"Fim da janela do Exame", subj:"AS" },
+  { date:"2026-09-14T22:00:00", label:"Prova Objetiva Regular", subj:"ED" },
+  { date:"2026-09-14T22:00:00", label:"Prova Objetiva Regular", subj:"AC" },
+  { date:"2026-12-20T22:00:00", label:"Prova de Recuperação (100%, tentativa única)", subj:"POO" }
+];
+
+const WEEKS = [
+  { num:1, name:"Análise do zero", dates:"27/07 – 02/08", tasks:[
+    {id:"w1-1", subj:"AS", text:"Aula 1 — Processos de Negócio e Notação BPMN"},
+    {id:"w1-2", subj:"AS", text:"Aula 2 — Histórico e Diagrama de Fluxo de Dados"},
+    {id:"w1-3", subj:"AS", text:"Aula 3 — Engenharia de Requisitos e Casos de Uso"},
+    {id:"w1-4", subj:"AC", text:"Aula 1 — Fundamentação"},
+    {id:"w1-5", subj:"AS", text:"Aula 4 — UML e Diagrama de Caso de Uso"},
+    {id:"w1-6", subj:"AS", text:"Revisão da semana + exercícios de fixação"},
+    {id:"w1-7", subj:"GER", text:"Manhãs qua/qui/sex: revisar Aulas 1–4 de Análise"},
+    {id:"w1-8", subj:"POO", text:"30min — Aula 1 (Linguagem Java)"}
+  ]},
+  { num:2, name:"Fechar conteúdo de Análise + começar Estrutura e Arquitetura", dates:"03/08 – 09/08", tasks:[
+    {id:"w2-1", subj:"AS", text:"Aula 5 — Diagrama de Classes"},
+    {id:"w2-3b", subj:"AC", text:"Aula 2 — Visão Geral dos Computadores"},
+    {id:"w2-3c", subj:"AC", text:"Aula 3 — Lógica Digital"},
+    {id:"w2-5", subj:"AS", text:"Aula 6 — Outros Diagramas Importantes"},
+    {id:"w2-6", subj:"ED", text:"Aula 1 e 2 — Algoritmos Estruturados / Estruturas de Repetição"},
+    {id:"w2-7", subj:"AS", text:"Revisão geral com questões/simulados"},
+    {id:"w2-9", subj:"GER", text:"Manhãs qua/qui/sex: revisão Análise 5–6 + fixação Estrutura 1–2"},
+    {id:"w2-10", subj:"POO", text:"30min — Aula 2 (Classes e Objetos)"}
+  ]},
+  { num:3, name:"Reta final de Análise", dates:"10/08 – 16/08", tasks:[
+    {id:"w3-1", subj:"AS", text:"Revisão intensiva (simulados, resumos, questões antigas)"},
+    {id:"w3-2", subj:"ED", text:"Aula 3 e 4 — Estruturas Homogêneas/Heterogêneas"},
+    {id:"w3-4", subj:"AS", text:"Revisão final (fixar, não conteúdo novo)"},
+    {id:"w3-5b", subj:"AC", text:"Aula 4 — Microprocessadores e a Microprogramação"},
+    {id:"w3-6", subj:"GER", text:"Manhãs qua/qui/sex: simulados intensivos de Análise"},
+    {id:"w3-7", subj:"POO", text:"30min — Aula 3 (Visibilidade)"}
+  ]},
+  { num:4, name:"Semana do Exame", dates:"17/08 – 23/08", tasks:[
+    {id:"w4-4b", subj:"AC", text:"Aula 5 — Sistemas Operacionais"},
+    {id:"w4-4c", subj:"AC", text:"Aula 6 — Arquiteturas Paralelas"},
+    {id:"w4-6", subj:"POO", text:"30min — Aula 4 (Herança)"}
+  ]},
+  { num:5, name:"Revisão geral — Estrutura de Dados", dates:"24/08 – 30/08", tasks:[
+    {id:"w5-2", subj:"ED", text:"Revisão geral (Aulas 1–7) para a Prova Objetiva"},
+    {id:"w5-3", subj:"GER", text:"Manhãs qua/qui/sex: revisão de Estrutura de Dados"},
+    {id:"w5-4", subj:"POO", text:"30min — Aula 5 (Polimorfismo)"}
+  ]},
+  { num:6, name:"Revisão intensiva das objetivas", dates:"31/08 – 06/09", tasks:[
+    {id:"w6-1", subj:"ED", text:"Revisão intensiva mirando a Prova Objetiva"},
+    {id:"w6-2", subj:"AC", text:"Revisão intensiva mirando a Prova Objetiva"},
+    {id:"w6-3", subj:"GER", text:"Manhãs qua/qui/sex: alternar revisão ED/AC"},
+    {id:"w6-4", subj:"POO", text:"30min — Aula 6 (Tratamento de Exceções)"}
+  ]},
+  { num:7, name:"Simulados finais", dates:"07/09 – 13/09", tasks:[
+    {id:"w7-1", subj:"ED", text:"Simulados finais de Estrutura de Dados"},
+    {id:"w7-2", subj:"AC", text:"Simulados finais de Arquitetura"},
+    {id:"w7-3", subj:"GER", text:"Manhãs qua/qui/sex: simulados finais das duas matérias"},
+    {id:"w7-4", subj:"POO", text:"Revisão geral leve (Aula 7)"}
+  ]},
+  { num:8, name:"Sem conteúdo novo", dates:"14/09", tasks:[
+    {id:"w8-1", subj:"GER", text:"Semana de folga de conteúdo — reforce o que achar necessário"}
+  ]}
+];
+
+const PROVAS = {
+  AS: [
+    {id:"p-as-1", text:"APOL 1 (peso 15%)", meta:"Entregue — nota 100", done0:true},
+    {id:"p-as-2", text:"APOL 2 (peso 15%)", meta:"Entregue — nota 100", done0:true},
+    {id:"p-as-3", text:"Prova Objetiva Regular (peso 30%)", meta:"Entregue — nota 80", done0:true},
+    {id:"p-as-4", text:"Trabalho (peso 40%)", meta:"Entregue — nota 20", done0:true},
+    {id:"p-as-5", text:"Exame / Recuperação — DECISIVO (peso 100%)", meta:"Presencial · agendar e fazer entre 17/08 e 31/08 (recomendado até dia 19)", done0:false}
+  ],
+  ED: [
+    {id:"p-ed-1", text:"APOL 1 (peso 15%)", meta:"Até 24/08 (23:59h)", done0:false},
+    {id:"p-ed-2", text:"APOL 2 (peso 15%)", meta:"Até 24/08 (23:59h)", done0:false},
+    {id:"p-ed-3", text:"Trabalho Prático 1 (peso 40%)", meta:"Entrega em PDF · até 24/08 (23:59h)", done0:false},
+    {id:"p-ed-4", text:"Prova Objetiva Regular (peso 30%)", meta:"Até 14/09 (22h)", done0:false}
+  ],
+  AC: [
+    {id:"p-ac-1", text:"APOL 1 (peso 15%)", meta:"Até 24/08 (23:59h)", done0:false},
+    {id:"p-ac-2", text:"APOL 2 (peso 15%)", meta:"Até 24/08 (23:59h)", done0:false},
+    {id:"p-ac-3", text:"Prova Atividade Prática (peso 40%)", meta:"1 tentativa · até 31/08 (23:59h)", done0:false},
+    {id:"p-ac-4", text:"Prova Objetiva Regular (peso 30%)", meta:"Até 14/09 (22h)", done0:false}
+  ],
+  POO: [
+    {id:"p-poo-1", text:"Prova de Recuperação (peso 100%)", meta:"1 tentativa · até 20/12 (22h)", done0:false}
+  ]
+};
+
+const ROUTINE = [
+  { name:"Segunda e Terça", note:"Home office — manhã livre para estudo, trabalho das 12h12 às 22h", color:"#F2C14E", slots:[
+    {time:"06h00–06h30", what:"Acordar / café", study:false},
+    {time:"06h30–10h00", what:"Bloco de estudo principal (3h30)", study:true},
+    {time:"10h00–12h12", what:"Organizar o dia / almoço antes do trabalho", study:false},
+    {time:"12h12–17h00", what:"Trabalho (home office — dá pra encaixar revisões rápidas entre tarefas)", study:false},
+    {time:"17h00–18h00", what:"Intervalo (1h) — descanso, ou 20-30min de revisão leve se sobrar energia", study:false},
+    {time:"18h00–22h00", what:"Trabalho", study:false},
+    {time:"22h00–23h00", what:"Descanso / jantar", study:false},
+    {time:"23h00–23h30", what:"Dormir", study:false}
+  ]},
+  { name:"Quarta, Quinta e Sexta", note:"Presencial — trabalho também das 12h12 às 22h", color:"#56CCF2", slots:[
+    {time:"06h00–06h30", what:"Acordar / café", study:false},
+    {time:"06h30–10h00", what:"Bloco de estudo (3h30)", study:true},
+    {time:"10h00–10h20", what:"Buffer / organizar as coisas", study:false},
+    {time:"10h20", what:"Se arrumar", study:false},
+    {time:"10h40", what:"Sair para o ônibus", study:false},
+    {time:"11h30", what:"Chega no trabalho (aguarda início)", study:false},
+    {time:"12h12–17h00", what:"Trabalho", study:false},
+    {time:"17h00–18h00", what:"Intervalo (1h)", study:false},
+    {time:"18h00–22h00", what:"Trabalho", study:false},
+    {time:"22h00–22h40", what:"Uber para casa (30-40min)", study:false},
+    {time:"22h40–23h30", what:"Jantar / dormir", study:false}
+  ]},
+  { name:"Sábado", note:"Dia livre — bloco grande de estudo", color:"#6FCF97", slots:[
+    {time:"08h30–09h00", what:"Acordar / café", study:false},
+    {time:"09h00–12h00", what:"Bloco de estudo 1 (3h)", study:true},
+    {time:"12h00–14h00", what:"Almoço / descanso", study:false},
+    {time:"14h00–16h30", what:"Bloco de estudo 2 (2h30)", study:true},
+    {time:"Noite", what:"Livre — sair com sua esposa", study:false}
+  ]},
+  { name:"Domingo", note:"Dia livre até 17h", color:"#9B7BEA", slots:[
+    {time:"09h00–12h00", what:"Bloco de estudo 3 (3h)", study:true},
+    {time:"12h00–13h00", what:"Almoço", study:false},
+    {time:"13h00–16h30", what:"Bloco de estudo 4 (3h30)", study:true},
+    {time:"17h00–19h00", what:"Culto", study:false}
+  ]}
+];
+
+const EVENTS = [
+  { date:"2026-08-17", subj:"AS", label:"Abre janela do Exame" },
+  { date:"2026-08-19", subj:"AS", label:"Recomendado: agendar/fazer Exame" },
+  { date:"2026-08-24", subj:"ED", label:"APOL 1, APOL 2 e Trabalho Prático" },
+  { date:"2026-08-24", subj:"AC", label:"APOL 1 e APOL 2" },
+  { date:"2026-08-31", subj:"AC", label:"Prova Atividade Prática" },
+  { date:"2026-08-31", subj:"AS", label:"Fim da janela do Exame" },
+  { date:"2026-09-14", subj:"ED", label:"Prova Objetiva Regular" },
+  { date:"2026-09-14", subj:"AC", label:"Prova Objetiva Regular" },
+  { date:"2026-12-20", subj:"POO", label:"Prova de Recuperação" }
+];
+
+let state = {};
+const STORAGE_KEY = "study-tracker-checks";
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    state = res && res.value ? JSON.parse(res.value) : {};
+  }catch(e){ state = {}; }
+  // aplica valores padrão (ex: provas já entregues) apenas se ainda não houver estado salvo
+  Object.values(PROVAS).flat().forEach(p => {
+    if(state[p.id] === undefined && p.done0) state[p.id] = true;
+  });
+}
+async function saveState(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(state), false); }
+  catch(e){ console.error("Falha ao salvar progresso", e); }
+}
+
+function fmtDate(d){
+  return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+}
+
+function renderCountdown(){
+  const now = new Date();
+  const upcoming = DEADLINES
+    .map(d => ({...d, dt:new Date(d.date)}))
+    .filter(d => d.dt > now)
+    .sort((a,b)=>a.dt-b.dt);
+
+  const box = document.getElementById('countdown');
+  const title = document.getElementById('next-title');
+  const sub = document.getElementById('next-sub');
+
+  if(!upcoming.length){
+    title.textContent = "Tudo entregue!";
+    sub.textContent = "Sem prazos futuros na lista.";
+    box.innerHTML = '🎉';
+    return;
+  }
+  const next = upcoming[0];
+  const diffMs = next.dt - now;
+  const days = Math.ceil(diffMs / (1000*60*60*24));
+  title.textContent = next.label;
+  sub.textContent = SUBJECTS[next.subj].name + " · até " + fmtDate(next.dt);
+  box.innerHTML = days + '<span class="unit">' + (days===1 ? 'dia' : 'dias') + '</span>';
+}
+
+function computeSubjectProgress(){
+  const totals = {};
+  Object.keys(SUBJECTS).forEach(k => totals[k] = {done:0, total:0});
+  WEEKS.forEach(w => w.tasks.forEach(t => {
+    totals[t.subj].total++;
+    if(state[t.id]) totals[t.subj].done++;
+  }));
+  Object.keys(PROVAS).forEach(subj => PROVAS[subj].forEach(p => {
+    totals[subj].total++;
+    if(state[p.id]) totals[subj].done++;
+  }));
+  return totals;
+}
+
+function renderSubjects(){
+  const totals = computeSubjectProgress();
+  const el = document.getElementById('subjects');
+  el.innerHTML = '';
+  Object.keys(SUBJECTS).forEach(key => {
+    const s = SUBJECTS[key];
+    const t = totals[key];
+    if(t.total === 0) return;
+    const pct = Math.round((t.done/t.total)*100);
+    const card = document.createElement('div');
+    card.className = 'subj-card';
+    card.innerHTML = `
+      <div class="subj-name">${s.name}</div>
+      <div class="subj-pct" style="color:${s.color}">${pct}%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${s.color}"></div></div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+function weekProgress(week){
+  const done = week.tasks.filter(t=>state[t.id]).length;
+  return `${done}/${week.tasks.length}`;
+}
+
+function renderWeeks(){
+  const el = document.getElementById('weeks');
+  el.innerHTML = '';
+  WEEKS.forEach(week => {
+    const details = document.createElement('div');
+    details.className = 'week';
+    details.dataset.week = week.num;
+
+    const head = document.createElement('div');
+    head.className = 'week-head';
+    head.innerHTML = `
+      <div class="week-num">${String(week.num).padStart(2,'0')}</div>
+      <div class="week-title">
+        <div class="name">${week.name}</div>
+        <div class="dates">${week.dates}</div>
+      </div>
+      <div class="week-progress">${weekProgress(week)}</div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+    head.addEventListener('click', () => {
+      details.classList.toggle('open');
+    });
+
+    const body = document.createElement('div');
+    body.className = 'week-body';
+    const list = document.createElement('div');
+    list.className = 'task-list';
+    week.tasks.forEach(t => {
+      const s = SUBJECTS[t.subj];
+      const row = document.createElement('div');
+      row.className = 'task' + (state[t.id] ? ' done' : '');
+      row.innerHTML = `
+        <input type="checkbox" id="${t.id}" ${state[t.id] ? 'checked' : ''}>
+        <label for="${t.id}"><span class="tag" style="background:${s.color}22;color:${s.color}">${s.name.split(' ')[0]}</span>${t.text}</label>
+      `;
+      const cb = row.querySelector('input');
+      cb.addEventListener('change', async () => {
+        state[t.id] = cb.checked;
+        row.classList.toggle('done', cb.checked);
+        head.querySelector('.week-progress').textContent = weekProgress(week);
+        renderSubjects();
+        renderCountdown();
+        await saveState();
+      });
+      list.appendChild(row);
+    });
+    body.appendChild(list);
+    details.appendChild(head);
+    details.appendChild(body);
+    el.appendChild(details);
+  });
+
+  // abre a primeira semana não concluída por padrão
+  const firstOpen = WEEKS.find(w => w.tasks.some(t => !state[t.id]));
+  if(firstOpen){
+    const target = el.querySelector(`[data-week="${firstOpen.num}"]`);
+    if(target) target.classList.add('open');
+  }
+}
+
+document.getElementById('reset-btn').addEventListener('click', async () => {
+  if(confirm('Isso vai apagar todo o progresso marcado (aulas e provas). Confirmar?')){
+    state = {};
+    await saveState();
+    renderSubjects();
+    renderWeeks();
+    renderProvas();
+    renderCountdown();
+  }
+});
+
+function renderRoutine(){
+  const el = document.getElementById('routine');
+  el.innerHTML = '';
+  ROUTINE.forEach(day => {
+    const card = document.createElement('div');
+    card.className = 'day-card';
+    card.style.setProperty('--dot', day.color);
+    const slotsHtml = day.slots.map(s => `
+      <div class="slot${s.study ? ' study' : ''}">
+        <div class="slot-time">${s.time}</div>
+        <div class="slot-what">${s.what}</div>
+      </div>
+    `).join('');
+    card.innerHTML = `
+      <div class="day-name">${day.name}</div>
+      <div class="day-note">${day.note}</div>
+      ${slotsHtml}
+    `;
+    el.appendChild(card);
+  });
+}
+
+function renderProvas(){
+  const el = document.getElementById('provas');
+  el.innerHTML = '';
+  Object.keys(PROVAS).forEach(subjKey => {
+    const s = SUBJECTS[subjKey];
+    const items = PROVAS[subjKey];
+    const doneCount = items.filter(p => state[p.id]).length;
+
+    const card = document.createElement('div');
+    card.className = 'prova-subject';
+
+    const head = document.createElement('div');
+    head.className = 'prova-subject-head';
+    head.innerHTML = `
+      <span class="prova-dot" style="background:${s.color}"></span>
+      <span class="name">${s.name}</span>
+      <span class="count">${doneCount}/${items.length}</span>
+    `;
+    card.appendChild(head);
+
+    items.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'prova-item' + (state[p.id] ? ' done' : '');
+      row.innerHTML = `
+        <input type="checkbox" id="${p.id}" ${state[p.id] ? 'checked' : ''}>
+        <div class="p-main">
+          <label for="${p.id}">${p.text}</label>
+          <div class="p-meta">${p.meta}</div>
+        </div>
+      `;
+      const cb = row.querySelector('input');
+      cb.addEventListener('change', async () => {
+        state[p.id] = cb.checked;
+        row.classList.toggle('done', cb.checked);
+        head.querySelector('.count').textContent = `${items.filter(x=>state[x.id]).length}/${items.length}`;
+        renderSubjects();
+        renderCountdown();
+        await saveState();
+      });
+      card.appendChild(row);
+    });
+
+    el.appendChild(card);
+  });
+}
+
+// alternância de abas
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---- Agenda mensal ----
+const WEEKDAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let agendaDate = new Date(2026, 6, 1); // Julho/2026 por padrão
+
+function eventsForDay(y, m, d){
+  const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  return EVENTS.filter(e => e.date === iso);
+}
+
+function renderCalendar(){
+  const y = agendaDate.getFullYear();
+  const m = agendaDate.getMonth();
+  document.getElementById('agenda-month-label').textContent = `${MONTH_NAMES[m]} ${y}`;
+
+  const grid = document.getElementById('calendar');
+  grid.innerHTML = '';
+  WEEKDAYS.forEach(w => {
+    const cell = document.createElement('div');
+    cell.className = 'cal-weekday';
+    cell.textContent = w;
+    grid.appendChild(cell);
+  });
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const today = new Date();
+
+  for(let i = 0; i < firstDay; i++){
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
+  }
+
+  for(let d = 1; d <= daysInMonth; d++){
+    const cell = document.createElement('div');
+    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
+    cell.className = 'cal-day' + (isToday ? ' today' : '');
+
+    const evs = eventsForDay(y, m, d);
+    const dotsHtml = evs.map(e => `<span class="cal-dot" style="background:${SUBJECTS[e.subj].color}"></span>`).join('');
+    const labelsHtml = evs.map(e => `<div class="ev-label" style="color:${SUBJECTS[e.subj].color}">${e.label}</div>`).join('');
+
+    cell.innerHTML = `
+      <div class="num">${d}</div>
+      ${evs.length ? `<div class="cal-dots">${dotsHtml}</div>${labelsHtml}` : ''}
+    `;
+    grid.appendChild(cell);
+  }
+}
+
+function renderAgendaLegend(){
+  const el = document.getElementById('agenda-legend');
+  el.innerHTML = Object.values(SUBJECTS).filter(s => s.name !== "Organização geral").map(s => `
+    <div class="legend-item"><span class="legend-dot" style="background:${s.color}"></span>${s.name}</div>
+  `).join('');
+}
+
+document.getElementById('agenda-prev').addEventListener('click', () => {
+  agendaDate.setMonth(agendaDate.getMonth() - 1);
+  renderCalendar();
+});
+document.getElementById('agenda-next').addEventListener('click', () => {
+  agendaDate.setMonth(agendaDate.getMonth() + 1);
+  renderCalendar();
+});
+
+(async () => {
+  await loadState();
+  renderCountdown();
+  renderSubjects();
+  renderRoutine();
+  renderWeeks();
+  renderProvas();
+  renderCalendar();
+  renderAgendaLegend();
+  setInterval(renderCountdown, 60000);
+})();
+</script>
+
+
+
+<hr>
+
+<h2>⚙ Administração</h2>
+
+<div id="admin">
+    <input
+        type="text"
+        id="nova-disciplina"
+        placeholder="Nome da disciplina"
+    >
+
+    <button id="btn-disciplina">
+        Adicionar disciplina
+    </button>
+
+    <ul id="lista-disciplinas"></ul>
+
+
+
+    <hr>
+
+<h3>Nova tarefa</h3>
+
+<input
+    type="text"
+    id="codigo-tarefa"
+    placeholder="Código (ex: w45)"
+>
+
+<input
+    type="text"
+    id="titulo-tarefa"
+    placeholder="Título da tarefa"
+>
+
+<select id="disciplina-tarefa">
+</select>
+
+<button id="btn-tarefa">
+    Adicionar tarefa
+</button>
+
+</div>
+
+
+
+<script>
+async function carregarTarefasSemana1() {
+    const resposta = await fetch("/tarefas");
+    const tarefas = await resposta.json();
+
+    tarefas.forEach((tarefa) => {
+        if (!tarefa.codigo || !tarefa.codigo.startsWith("w")) {
+            return;
+        }
+
+        const checkbox = document.getElementById(tarefa.codigo);
+
+        if (checkbox) {
+            checkbox.checked = tarefa.concluida;
+        }
+    });
+}
+
+document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+    if (!checkbox.id.startsWith("w")) {
+        return;
+    }
+
+    checkbox.addEventListener("change", async () => {
+        await fetch(`/tarefas/codigo/${checkbox.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                concluida: checkbox.checked
+            })
+        });
+    });
+});
+
+carregarTarefasSemana1();
+
+    // COLE AQUI
+    const botaoDisciplina = document.getElementById("btn-disciplina");
+    const campoDisciplina = document.getElementById("nova-disciplina");
+
+    const campoCodigo = document.getElementById("codigo-tarefa");
+    const campoTitulo = document.getElementById("titulo-tarefa");
+    const campoDisciplinaSelect = document.getElementById("disciplina-tarefa");
+    const botaoTarefa = document.getElementById("btn-tarefa");
+
+    botaoDisciplina.addEventListener("click", async () => {
+        const nome = campoDisciplina.value.trim();
+
+        if (!nome) {
+            alert("Digite o nome da disciplina.");
+            return;
+        }
+
+        const resposta = await fetch("/disciplinas", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ nome })
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            alert(dados.erro || "Erro ao cadastrar disciplina.");
+            return;
+        }
+
+        alert("Disciplina cadastrada com sucesso.");
+        campoDisciplina.value = "";
+        carregarDisciplinas();
+    });
+
+    botaoTarefa.addEventListener("click", async () => {
+
+    const codigo = campoCodigo.value.trim();
+    const titulo = campoTitulo.value.trim();
+    const disciplina_id = campoDisciplinaSelect.value;
+
+    if (!codigo || !titulo || !disciplina_id) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+const resposta = await fetch("/tarefas", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        codigo,
+        titulo,
+        disciplina_id: Number(disciplina_id)
+    })
+});
+
+const dados = await resposta.json();
+
+if (!resposta.ok) {
+    alert(dados.erro || "Erro ao cadastrar tarefa.");
+    return;
+}
+
+alert("Tarefa cadastrada com sucesso.");
+
+campoCodigo.value = "";
+campoTitulo.value = "";
+campoDisciplinaSelect.value = "";
+
+
+
+async function carregarTarefasDoBanco() {
+    const resposta = await fetch("/tarefas");
+    const tarefas = await resposta.json();
+
+    tarefas.forEach((tarefa) => {
+        if (!tarefa.codigo || !tarefa.codigo.startsWith("w")) {
+            return;
+        }
+
+        const partes = tarefa.codigo.split("-");
+        const numeroSemana = Number(partes[0].replace("w", ""));
+
+        const semana = WEEKS.find(
+            (item) => item.num === numeroSemana
+        );
+
+        if (!semana) {
+            return;
+        }
+
+        const tarefaJaExiste = semana.tasks.some(
+            (item) => item.id === tarefa.codigo
+        );
+
+        if (!tarefaJaExiste) {
+            const mapaDisciplinas = {
+                "Português": "GER",
+                "Matemática": "ED",
+                "Arquitetura": "AC",
+                "Análise": "AS",
+                "Programação": "POO"
+            };
+
+            semana.tasks.push({
+                id: tarefa.codigo,
+                subj: mapaDisciplinas[tarefa.disciplina_nome] || "GER",
+                text: tarefa.titulo
+            });
+        }
+
+        state[tarefa.codigo] = tarefa.concluida;
+    });
+
+    renderWeeks();
+}
+
+});
+
+
+    async function carregarDisciplinas() {
+    const resposta = await fetch("/disciplinas");
+    const disciplinas = await resposta.json();
+    const lista = document.getElementById("lista-disciplinas");
+    const seletor = document.getElementById("disciplina-tarefa");
+    lista.innerHTML = "";
+    seletor.innerHTML = '<option value="">Selecione uma disciplina</option>';
+
+
+    disciplinas.forEach((disciplina) => {
+        const item = document.createElement("li");
+        item.textContent = `${disciplina.id} - ${disciplina.nome} `;
+
+        const botaoExcluir = document.createElement("button");
+        botaoExcluir.textContent = "Excluir";
+
+        botaoExcluir.addEventListener("click", async () => {
+
+          const confirmar = confirm(
+              `Deseja excluir a disciplina "${disciplina.nome}"?`
+          );
+
+          if (!confirmar) return;
+
+          await fetch(`/disciplinas/${disciplina.id}`, {
+              method: "DELETE"
+          });
+
+          carregarDisciplinas();
+        });
+
+        item.appendChild(botaoExcluir);
+        lista.appendChild(item);
+          
+        const opcao = document.createElement("option");
+        opcao.value = disciplina.id;
+        opcao.textContent = disciplina.nome;
+        seletor.appendChild(opcao);
+     });
+}
+
+
+async function renderizarTarefasDinamicas() {
+    const resposta = await fetch("/tarefas");
+    const tarefas = await resposta.json();
+
+    const container = document.getElementById("weeks-dinamicas");
+    container.innerHTML = "";
+
+    const tarefasValidas = tarefas.filter(
+        tarefa => tarefa.codigo && /^w\d+-/.test(tarefa.codigo)
+    );
+
+    const semanas = {};
+
+    tarefasValidas.forEach((tarefa) => {
+        const numeroSemana = Number(
+            tarefa.codigo.split("-")[0].replace("w", "")
+        );
+
+        if (!semanas[numeroSemana]) {
+            semanas[numeroSemana] = [];
+        }
+
+        semanas[numeroSemana].push(tarefa);
+    });
+
+    Object.keys(semanas)
+        .sort((a, b) => Number(a) - Number(b))
+        .forEach((numeroSemana) => {
+            const tarefasSemana = semanas[numeroSemana];
+
+            const concluidas = tarefasSemana.filter(
+                tarefa => tarefa.concluida
+            ).length;
+
+            const blocoSemana = document.createElement("div");
+            blocoSemana.className = "week open";
+
+            const numeroFormatado = String(numeroSemana).padStart(2, "0");
+
+            blocoSemana.innerHTML = `
+                <div class="week-head">
+                    <div class="week-num">${numeroFormatado}</div>
+
+                    <div class="week-title">
+                        <div class="name">Semana ${numeroFormatado}</div>
+                        <div class="dates">Tarefas cadastradas</div>
+                    </div>
+
+                    <div class="week-progress">
+                        ${concluidas}/${tarefasSemana.length}
+                    </div>
+                </div>
+
+                <div class="week-body">
+                    <div class="task-list"></div>
+                </div>
+            `;
+
+            const lista = blocoSemana.querySelector(".task-list");
+
+            tarefasSemana.forEach((tarefa) => {
+                const item = document.createElement("div");
+
+                item.className = tarefa.concluida
+                    ? "task done"
+                    : "task";
+
+                item.innerHTML = `
+                    <input
+                        type="checkbox"
+                        id="${tarefa.codigo}"
+                        ${tarefa.concluida ? "checked" : ""}
+                    >
+
+                    <label for="${tarefa.codigo}">
+                        <span class="tag">
+                            ${tarefa.disciplina_nome || "Sem disciplina"}
+                        </span>
+
+                        ${tarefa.titulo}
+                    </label>
+
+                    <button class="btn-excluir-tarefa">
+                        Excluir
+                    </button>
+                `;
+
+                const botaoExcluir = item.querySelector(".btn-excluir-tarefa");
+
+                botaoExcluir.addEventListener("click", async () => {
+                    const confirmar = confirm(
+                        `Deseja excluir a tarefa "${tarefa.titulo}"?`
+                    );
+
+                    if (!confirmar) return;
+
+                    const resposta = await fetch(`/tarefas/${tarefa.id}`, {
+                        method: "DELETE"
+                    });
+
+                    const dados = await resposta.json();
+
+                    if (!resposta.ok) {
+                        alert(dados.erro || "Erro ao excluir tarefa.");
+                        return;
+                    }
+
+                    await renderizarTarefasDinamicas();
+                });
+
+                const checkbox = item.querySelector('input[type="checkbox"]');
+
+                checkbox.addEventListener("change", async () => {
+                    const resposta = await fetch(`/tarefas/${tarefa.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            concluida: checkbox.checked
+                        })
+                    });
+
+                    const dados = await resposta.json();
+
+                    if (!resposta.ok) {
+                        alert(dados.erro || "Erro ao atualizar tarefa.");
+                        checkbox.checked = !checkbox.checked;
+                        return;
+                    }
+
+                    await renderizarTarefasDinamicas();
+                });
+
+                lista.appendChild(item);
+            });
+
+            container.appendChild(blocoSemana);
+        });
+}
+
+carregarDisciplinas();
+renderizarTarefasDinamicas();
+
+</script>
+
+
+
+</body></html>
