@@ -294,6 +294,55 @@
       background: var(--bad);
       color: white;
   }
+
+.escondido {
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.escondido {
+    display: none;
+}
+
+.modal-conteudo {
+    width: min(420px, 90%);
+    padding: 24px;
+    border-radius: 12px;
+    background: #1f3b63;
+}
+
+.modal-conteudo h2 {
+    margin-top: 0;
+}
+
+.modal-conteudo label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 5px;
+}
+
+.modal-conteudo input,
+.modal-conteudo select {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.modal-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
 </style>
 </head>
 <body>
@@ -1603,7 +1652,7 @@ async function carregarTarefasDoBanco() {
     lista.innerHTML = "";
     seletor.innerHTML = '<option value="">Selecione uma disciplina</option>';
 
-
+    // LISTA DE DISCIPLINAS E OPÇÕES DO SELECT
     disciplinas.forEach((disciplina) => {
         const item = document.createElement("li");
         item.textContent = `${disciplina.id} - ${disciplina.nome} `;
@@ -1719,12 +1768,44 @@ async function renderizarTarefasDinamicas() {
                         ${tarefa.titulo}
                     </label>
 
-                    <button class="btn-excluir-tarefa">
-                        Excluir
-                    </button>
+                    <div class="acoes-tarefa">
+                        <button class="btn-editar-tarefa">
+                            Editar
+                        </button>
+
+                        <button class="btn-excluir-tarefa">
+                            Excluir
+                        </button>
+                    </div>
                 `;
 
                 const botaoExcluir = item.querySelector(".btn-excluir-tarefa");
+                const botaoEditar = item.querySelector(".btn-editar-tarefa");
+                
+
+                // BOTÃO DE EDITAR E EXCLUIR TAREFA
+                botaoEditar.addEventListener("click", () => {
+
+                    document
+                        .getElementById("modal-editar-tarefa")
+                        .classList.remove("escondido");
+
+                    document
+                        .getElementById("editar-tarefa-id")
+                        .value = tarefa.id;
+
+                    document
+                        .getElementById("editar-tarefa-codigo")
+                        .value = tarefa.codigo;
+
+                    document
+                        .getElementById("editar-tarefa-titulo")
+                        .value = tarefa.titulo;
+
+                    document
+                        .getElementById("editar-tarefa-disciplina")
+                        .value = tarefa.disciplina_id || "";
+                });
 
                 botaoExcluir.addEventListener("click", async () => {
                     const confirmar = confirm(
@@ -1781,7 +1862,44 @@ async function renderizarTarefasDinamicas() {
 carregarDisciplinas();
 renderizarTarefasDinamicas();
 
+
+
 </script>
+
+<div id="modal-editar-tarefa" class="modal escondido">
+    <div class="modal-conteudo">
+        <h2>Editar tarefa</h2>
+
+        <input type="hidden" id="editar-tarefa-id">
+
+        <label for="editar-tarefa-codigo">Código</label>
+        <input
+            type="text"
+            id="editar-tarefa-codigo"
+        >
+
+        <label for="editar-tarefa-titulo">Título</label>
+        <input
+            type="text"
+            id="editar-tarefa-titulo"
+        >
+
+        <label for="editar-tarefa-disciplina">Disciplina</label>
+        <select id="editar-tarefa-disciplina">
+            <option value="">Selecione uma disciplina</option>
+        </select>
+
+        <div class="modal-acoes">
+            <button type="button" id="cancelar-edicao">
+                Cancelar
+            </button>
+
+            <button type="button" id="salvar-edicao">
+                Salvar
+            </button>
+        </div>
+    </div>
+</div>
 
 
 
