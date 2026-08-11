@@ -115,3 +115,40 @@ def excluir_tarefa(id_tarefa):
     return jsonify({
         "mensagem": "Tarefa excluída com sucesso."
     })
+
+
+
+@tarefas.route("/tarefas/<int:id_tarefa>", methods=["PATCH"])
+def editar_tarefa(id_tarefa):
+    dados = request.get_json()
+    codigo = dados.get("codigo", "").strip()
+    titulo = dados.get("titulo", "").strip()
+    disciplina_id = dados.get("disciplina_id")
+
+    if not codigo or not titulo:
+        return jsonify({
+            "erro": "Código e título são obrigatórios."
+        }), 400
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE tarefas
+        SET codigo = ?,
+            titulo = ?,
+            disciplina_id = ?
+        WHERE id = ?
+    """, (
+        codigo,
+        titulo,
+        disciplina_id,
+        id_tarefa
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "mensagem": "Tarefa atualizada com sucesso."
+    })
