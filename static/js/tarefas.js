@@ -171,6 +171,100 @@ async function renderizarTarefasDinamicas() {
         });
 }
 
+
+const campoCodigo = document.getElementById("codigo-tarefa");
+const campoTitulo = document.getElementById("titulo-tarefa");
+const campoDisciplinaSelect = document.getElementById("disciplina-tarefa");
+const botaoTarefa = document.getElementById("btn-tarefa");
+
+
+
+botaoTarefa.addEventListener("click", async () => {
+
+    const codigo = campoCodigo.value.trim();
+    const titulo = campoTitulo.value.trim();
+    const disciplina_id = campoDisciplinaSelect.value;
+
+    if (!codigo || !titulo || !disciplina_id) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    const resposta = await fetch("/tarefas", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            codigo,
+            titulo,
+            disciplina_id: Number(disciplina_id)
+        })
+    });
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+        alert(dados.erro || "Erro ao cadastrar tarefa.");
+        return;
+    }
+
+    alert("Tarefa cadastrada com sucesso.");
+
+    campoCodigo.value = "";
+    campoTitulo.value = "";
+    campoDisciplinaSelect.value = "";
+
+
+
+    async function carregarTarefasDoBanco() {
+        const resposta = await fetch("/tarefas");
+        const tarefas = await resposta.json();
+
+        tarefas.forEach((tarefa) => {
+            if (!tarefa.codigo || !tarefa.codigo.startsWith("w")) {
+                return;
+            }
+
+            const partes = tarefa.codigo.split("-");
+            const numeroSemana = Number(partes[0].replace("w", ""));
+
+            const semana = WEEKS.find(
+                (item) => item.num === numeroSemana
+            );
+
+            if (!semana) {
+                return;
+            }
+
+            const tarefaJaExiste = semana.tasks.some(
+                (item) => item.id === tarefa.codigo
+            );
+
+            if (!tarefaJaExiste) {
+                const mapaDisciplinas = {
+                    "Português": "GER",
+                    "Matemática": "ED",
+                    "Arquitetura": "AC",
+                    "Análise": "AS",
+                    "Programação": "POO"
+                };
+
+                semana.tasks.push({
+                    id: tarefa.codigo,
+                    subj: mapaDisciplinas[tarefa.disciplina_nome] || "GER",
+                    text: tarefa.titulo
+                });
+            }
+
+            state[tarefa.codigo] = tarefa.concluida;
+        });
+
+        renderWeeks();
+    }
+
+});
+
+
+
 renderizarTarefasDinamicas();
-
-

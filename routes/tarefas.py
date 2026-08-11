@@ -1,3 +1,4 @@
+import sqlite3
 from flask import Blueprint, jsonify, request
 from database.database import conectar
 from database.models import atualizar_tarefa, buscar_tarefa_por_codigo, atualizar_tarefa_por_codigo
@@ -45,26 +46,35 @@ def adicionar_tarefa():
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        INSERT INTO tarefas
-        (codigo, titulo, concluida, disciplina_id)
-        VALUES (?, ?, ?, ?)
-        """,
-        (
-            dados["codigo"],
-            dados["titulo"],
-            False,
-            dados["disciplina_id"]
+    try:
+        cursor.execute(
+            """
+            INSERT INTO tarefas
+            (codigo, titulo, concluida, disciplina_id)
+            VALUES (?, ?, ?, ?)
+            """,
+            (
+                dados["codigo"],
+                dados["titulo"],
+                False,
+                dados["disciplina_id"]
+            )
         )
-    )
 
-    conn.commit()
+        conn.commit()
+
+    except sqlite3.IntegrityError:
+        conn.close()
+
+        return jsonify({
+            "erro": "Já existe uma tarefa com esse código."
+        }), 409
+
     conn.close()
 
     return jsonify({
         "mensagem": "Tarefa adicionada"
-    })
+    }), 201
 
 
 
